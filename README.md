@@ -51,7 +51,7 @@ python scripts/html2editable_pptx.py 我的幻灯片.html 成品.pptx /path/phot
 
 参考模板：`templates/presentation.html`（深蓝+橙 7 页示例）。
 
-图标：从 [Tabler Icons](https://tabler.io/icons) 复制 SVG 内联进 HTML（去注释头、设 width/height、stroke 保持 currentColor）。
+图标：从 [Tabler Icons](https://tabler.io/icons) 复制 SVG 内联进 HTML（去注释头、设 width/height、stroke 保持 currentColor）。**Tabler Icons 为 MIT 许可**（[github.com/tabler/tabler-icons](https://github.com/tabler/tabler-icons)），免费商用、可再分发，使用/再分发时注明来源即可。本项目不内置任何图标本体，图标由使用方自行从 Tabler 获取。
 
 忽略元素：加 `data-html2pptx-ignore` 属性，转换时跳过。
 
