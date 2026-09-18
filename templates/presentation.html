@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幻灯片标题</title>
+<style>
+  :root {
+    --bg: #0e1526; --bg2: #141d33; --ink: #e8ecf4; --muted: #8b96ad;
+    --accent: #f5a623; --accent2: #4c8dff; --card: rgba(255,255,255,.04);
+    --line: rgba(255,255,255,.09);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; overflow: hidden; }
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 48px 48px; }
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center;
+    padding: 8vh 10vw; opacity: 0; transform: translateY(24px);
+    transition: opacity .5s ease, transform .5s ease; pointer-events: none; }
+  .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+  .kicker { font-size: 14px; letter-spacing: .35em; text-transform: uppercase; color: var(--accent); margin-bottom: 22px; font-weight: 600; }
+  h1 { font-size: clamp(40px, 6vw, 72px); line-height: 1.15; font-weight: 700; letter-spacing: -.01em; }
+  h1 .hl { color: var(--accent); }
+  h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 700; margin-bottom: 34px; }
+  h2 .hl { color: var(--accent); }
+  .sub { color: var(--muted); font-size: clamp(16px, 2vw, 22px); margin-top: 22px; line-height: 1.7; max-width: 46em; }
+  .grid { display: grid; gap: 18px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px; transition: transform .2s ease, border-color .2s ease; }
+  .card:hover { transform: translateY(-3px); border-color: rgba(245,166,35,.4); }
+  .card .num { font-size: 12px; color: var(--accent); letter-spacing: .2em; font-weight: 700; }
+  .card h3 { font-size: 19px; font-weight: 700; margin: 10px 0 8px; }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+  .list { display: grid; gap: 14px; }
+  .item { display: flex; gap: 16px; align-items: baseline; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex-shrink: 0; transform: translateY(-2px); }
+  .item .txt { font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6; }
+  .item .txt small { color: var(--muted); font-size: .8em; display: block; margin-top: 2px; }
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 10; }
+  .pager { position: fixed; bottom: 26px; right: 34px; font-size: 13px; color: var(--muted); letter-spacing: .15em; z-index: 10; }
+  .hint { position: fixed; bottom: 26px; left: 34px; font-size: 12px; color: rgba(139,150,173,.5); z-index: 10; }
+  .foot { margin-top: 44px; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 14px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #e0507a); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .vs-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 26px 30px; }
+  .vs-card.bad { border-color: rgba(255,92,92,.35); } .vs-card.good { border-color: rgba(52,199,123,.35); }
+  .vs-card h4 { font-size: 15px; letter-spacing: .25em; margin-bottom: 18px; }
+  .vs-card.bad h4 { color: #ff5c5c; } .vs-card.good h4 { color: #34c77b; }
+  .vs-card ul { list-style: none; display: grid; gap: 12px; }
+  .vs-card li { font-size: 16px; line-height: 1.5; display: flex; gap: 10px; align-items: baseline; }
+  .vs-card.bad li::before { content: "✕"; color: #ff5c5c; }
+  .vs-card.good li::before { content: "✓"; color: #34c77b; }
+  .small { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="progress" id="bar"></div>
+<div class="hint">空格 / 方向键 / 点击 翻页</div>
+<div class="pager" id="pager">1 / 7</div>
+<div class="deck" id="deck">
+
+  <!-- 1 封面 -->
+  <section class="slide active">
+    <div class="kicker">小奈出品</div>
+    <h1>大标题</h1>
+    <p class="sub">副标题一句话。</p>
+    <div class="foot"><div class="avatar">🐾</div><div>小奈 · 日期</div></div>
+  </section>
+
+  <!-- 2 卡片页 -->
+  <section class="slide">
+    <div class="kicker">01 · 章节</div>
+    <h2>小节标题</h2>
+    <div class="grid g4">
+      <div class="card"><span class="num">要点</span><h3>标题</h3><p>说明</p><span class="star">★ 标签</span></div>
+      <div class="card"><span class="num">要点</span><h3>标题</h3><p>说明</p><span class="star">★ 标签</span></div>
+      <div class="card"><span class="num">要点</span><h3>标题</h3><p>说明</p><span class="star">★ 标签</span></div>
+      <div class="card"><span class="num">要点</span><h3>标题</h3><p>说明</p><span class="star">★ 标签</span></div>
+    </div>
+  </section>
+
+  <!-- 3 列表页 -->
+  <section class="slide">
+    <div class="kicker">02 · 章节</div>
+    <h2>小节标题</h2>
+    <div class="list">
+      <div class="item"><span class="dot"></span><div class="txt">要点一<small>补充说明</small></div></div>
+      <div class="item"><span class="dot"></span><div class="txt">要点二<small>补充说明</small></div></div>
+      <div class="item"><span class="dot"></span><div class="txt">要点三<small>补充说明</small></div></div>
+    </div>
+  </section>
+
+  <!-- 4 对比页 -->
+  <section class="slide">
+    <div class="kicker">03 · 章节</div>
+    <h2>对比标题</h2>
+    <div class="two">
+      <div class="vs-card bad"><h4>俗</h4><ul><li>反面例子</li></ul></div>
+      <div class="vs-card good"><h4>雅</h4><ul><li>正面例子</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 5 结束 -->
+  <section class="slide">
+    <div class="kicker">结尾</div>
+    <h1>谢谢 <span class="hl">观看</span></h1>
+    <p class="sub">一句话总结。</p>
+  </section>
+
+</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  const pager = document.getElementById('pager');
+  let cur = 0;
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle('active', k === cur));
+    bar.style.width = ((cur + 1) / slides.length * 100) + '%';
+    pager.textContent = (cur + 1) + ' / ' + slides.length;
+  }
+  document.addEventListener('keydown', e => {
+    if ([' ', 'ArrowRight', 'ArrowDown', 'Enter', 'PageDown'].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+    if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  });
+  document.addEventListener('click', e => show(cur + 1));
+  show(0);
+</script>
+</body>
+</html>
